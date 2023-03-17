@@ -11,4 +11,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-#http://127.0.0.1:8080/weatherinformation?location=Braunschweig&openweathermaps_api_key=4b8f1ddd0540ebd49a6b0ca7927e3534
