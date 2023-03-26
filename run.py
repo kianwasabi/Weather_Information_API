@@ -6,8 +6,8 @@ def main():
     try: 
         app.run(hostIP, port, debug=True)
         print("🫡 Server started")
-    except Exception as e:
-        print (f"Starting Server failed - Error: {e}")
+    except Exception as err:
+        print (f"Starting Server failed - Error: {err}")
 
 if __name__ == '__main__':
     main()

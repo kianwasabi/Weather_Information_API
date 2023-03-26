@@ -1,111 +1,96 @@
-import math
-import requests
-from collections import defaultdict
+import  math
+import  requests
+from    datetime import datetime
 
 class Time(): 
     def __init__(self, timestamp , timezone):
-        self.year = timestamp.year
-        self.month = timestamp.month
-        self.day = timestamp.day
-        self.hour = timestamp.hour
-        self.minute = timestamp.minute
-        self.second = timestamp.second
-        self.timezone = timezone
+        self.UNIXtimezone = timezone #unix, sec
+        self.UNIXtimestamp, self.UTCdatetime = self._editTimewithTimezone(timestamp) # unix time edited with timezone returned as UTC TS & UNIX
+        self.year, self.month, self.day, self.hour, self.minute, self.second = self._cropUTCdatetime() #simple time&date notation
+    def _editTimewithTimezone(self, timestamp):
+        ts_unedited = timestamp                     # unix timestamp in sec
+        tz = self.UNIXtimezone                      # unix timezone in sec
+        ts_edited = ts_unedited + tz                # edited unix timestamp in sec 
+        dt = datetime.utcfromtimestamp(ts_edited)   # Construct a naive UTC datetime from a POSIX timestamp.
+        return ts_edited, dt
+    def _cropUTCdatetime(self):
+        year = self.UTCdatetime.year
+        month = self.UTCdatetime.month
+        day = self.UTCdatetime.day
+        hour = self.UTCdatetime.hour
+        minute = self.UTCdatetime.minute
+        second = self.UTCdatetime.second
+        return year, month, day, hour, minute, second
     def getDate(self):
-        '''return date at timezone - string'''
         d = "{:02d}".format(self.day)
         m = "{:02d}".format(self.month)
         y = "{:04d}".format(self.year)
-        return f"{d}.{m}.{y}"
+        return f"{y}-{m}-{d}"
     def getTime(self):
-        '''return time at Timezone - string'''
         h = "{:02d}".format(self.hour)
         m = "{:02d}".format(self.minute)
         s = "{:02d}".format(self.second)
         return f"{h}:{m}:{s}"
-    def getTimezone(self):
-        '''return Timezone - string'''
-        return f"{self.timezone}"
-    def _editTimewithTimezone(self):
-        self.hour = self.hour + self.timezone
 
 class Location(Time): 
-    def __init__(self,name,longitude, latitude, timestamp, timezone):
-       Time.__init__(self, timestamp, timezone) 
-       self.name = name
-       self.longitude = longitude
-       self.latitude = latitude
-    def getLocationName(self):
-        return f"{self.name}"
-    def getLongitude(self):
-        return f"{self.longitude}"
-    def getLatitude(self):
-        return f"{self.latitude}"
+    def __init__(self,name,longitude, latitude, country, timestamp, timezone):
+        Time.__init__(self, timestamp, timezone) 
+        self.name = name
+        self.longitude = longitude
+        self.latitude = latitude
+        self.country =  country
 
 class Wind(Location):
-    def __init__(self, wind_speed, wind_direction, name,longitude, latitude, timestamp, timezone):
-        Location.__init__(self, name, longitude, latitude, timestamp, timezone)
+    def __init__(self, wind_speed, wind_direction, name, country, longitude, latitude, timestamp, timezone):
+        Location.__init__(self,name,longitude, latitude, country, timestamp, timezone)
         self.speed = wind_speed
-        self.direction = wind_direction     
-    def getWindSpeed(self):
-        return f"{self.speed}"
-    def getDirectionDegree(self):
-        return f"{self.direction}"
+        self.direction = wind_direction    
     def getDirectionPoint(self):
         if(self.direction>337.5):
-            return 'N'
+            return 'North'
         if(self.direction>292.5):
-            return 'NW'
+            return 'North-West'
         if(self.direction>247.5):
-            return 'W'
+            return 'West'
         if(self.direction>202.5):
-            return 'SW'
+            return 'South-West'
         if(self.direction>157.5):
-            return 'S'
+            return 'South'
         if(self.direction>122.5):
-            return 'SE'
+            return 'South-East'
         if(self.direction>67.5):
-            return 'E'
+            return 'East'
         if(self.direction>22.5):
-            return 'NE'
-        return 'N'             
+            return 'Norht-East'
+        return 'North'           
 
-class Weather(Location):
-    def __init__(self,temperatur, weather_descr, cloudiness, visibility, name, longitude, latitude, timestamp, timezone):
-        Location.__init__(self, name, longitude, latitude, timestamp, timezone)
-        self.temperatur = temperatur
+class Weather(Location): 
+    def __init__(self,temperatur,min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, name, country, longitude, latitude, timestamp, timezone):
+        Location.__init__(self, name, longitude, latitude, country, timestamp, timezone)
+        self.current_temperatur = temperatur
+        self.min_temperatur = min_temperatur
+        self.max_temperatur = max_temperatur
+        self.feel_temperatur = feel_temperatur
         self.weather_descr = weather_descr
         self.cloudiness = cloudiness
         self.visibility = visibility  
-    def getTemperatur(self):
-        return f"{self.temperatur}"
-    def getWeatherDiscription(self):
-        return f"{self.weather_descr}"
-    def getCloudiness(self):    
-        return f"{self.cloudiness}"
-    def getVisibility(self):
-        return f"{self.visibility}"
 
 class Sun(Location):
-    def __init__(self, timestamp_sunrise, timestamp_sunset, name, longitude, latitude, timestamp, timezone):
-        Location.__init__(self, name, longitude, latitude, timestamp, timezone)
+    def __init__(self, timestamp_sunrise, timestamp_sunset, name, country, longitude, latitude, timestamp, timezone):
+        Location.__init__(self, name, longitude, latitude, country ,timestamp, timezone)
         self.sunrise = Time(timestamp_sunrise, timezone)
         self.sunset = Time(timestamp_sunset, timezone)
-        self.azimuth, self.elevation  = self.__SunPosition()
-    def getTimeSunrise(self):
-        return f"{self.sunrise.getTime()}"
-    def getTimeSunset(self):
-        return f"{self.sunset.getTime()}"
+        self.azimuth, self.elevation  = self._SunPosition()
     def getAzimuth(self):
-        return f"{self.azimuth}"
+        return self.azimuth
     def getElevation(self):
-        return f"{self.elevation}"
+        return self.elevation
     def getSunPosition(self):
         return self.azimuth, self.elevation
-    def __SunPosition(self):
+    def _SunPosition(self):
         ''' 
         Calculate Azimuth and Elevation
-        Source: https://levelup.gitconnected.com/python-sun-position-for-solar-energy-and-research-7a4ead801777
+        Source (modified): https://levelup.gitconnected.com/python-sun-position-for-solar-energy-and-research-7a4ead801777
         '''
         refraction = True
         year = self.year
@@ -114,7 +99,7 @@ class Sun(Location):
         hour = self.hour
         minute = self.minute
         second = self.second
-        timezone = self.timezone
+        timezone = self.UNIXtimezone/60/60
         longitude = self.longitude
         latitude = self.latitude 
         #inner function 
@@ -152,63 +137,79 @@ class Sun(Location):
             targ = rad((elevation + (10.3 / (elevation + 5.11))))
             elevation += (1.02 / tan(targ)) / 60
         return round(azimuth, 2), round(elevation, 2)
-        #self.azimuth = round(azimuth, 2)
-        #self.elevation = round(elevation, 2)
-        # return f"{self.azimuth} °; {self.elevation} °"
+
     def getAzimuthPoint(self):
         if(self.azimuth>337.5):
-            return 'N'
+            return 'North'
         if(self.azimuth>292.5):
-            return 'NW'
+            return 'North-West'
         if(self.azimuth>247.5):
-            return 'W'
+            return 'West'
         if(self.azimuth>202.5):
-            return 'SW'
+            return 'South-West'
         if(self.azimuth>157.5):
-            return 'S'
+            return 'South'
         if(self.azimuth>122.5):
-            return 'SE'
+            return 'South-East'
         if(self.azimuth>67.5):
-            return 'E'
+            return 'East'
         if(self.azimuth>22.5):
-            return 'NE'
-        return 'N'
+            return 'Norht-East'
+        return 'North'
 
 class WeatherInformation(Sun,Weather,Wind):
-    def __init__(self, timestamp_sunrise, timestamp_sunset, temperatur, weather_descr, cloudiness, visibility, wind_speed, wind_direction, name,longitude, latitude, timestamp, timezone):
-        Sun.__init__(self,timestamp_sunrise, timestamp_sunset, name, longitude, latitude, timestamp, timezone)
-        Weather.__init__(self,temperatur, weather_descr, cloudiness, visibility, name, longitude, latitude, timestamp, timezone)
-        Wind.__init__(self,wind_speed, wind_direction, name,longitude, latitude, timestamp, timezone)
+    '''
+    Construct Weather Information Object.
+    '''
+    def __init__(self, timestamp_sunrise, timestamp_sunset, current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, wind_speed, wind_direction, name, country, longitude, latitude, timestamp, timezone):
+        Sun.__init__(self,timestamp_sunrise, timestamp_sunset, name, country, longitude, latitude, timestamp, timezone)
+        Weather.__init__(self,current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, name, country, longitude, latitude, timestamp, timezone)
+        Wind.__init__(self,wind_speed, wind_direction, name, country, longitude, latitude, timestamp, timezone)
 
-class API():
+class CallOpenWeatherMapAPI():
+    '''
+    error_code: 
+    (None) if no error occured,
+    (str) "API-Error: URL not accepted." if connection was successful but the URL was not accepted, 
+    (str) "API-Error: Connection failed." if connection to failed. 
+    api_data:
+    (tuple) if no api error occured
+    (None) if Connection failed & URL was not accepted. 
+    '''
     def __init__(self,city_name:str,user_api:str):
         self.city_name                  = city_name
         self.user_api                   = user_api
+        self.units                      = "metric" # api is called with metric system by default
         self.api_data, self.error_code  = self._callAPI()
-    def _def_value_dict():
-        return "Not Present"
     def _callAPI(self):
-        api_data = defaultdict(self._def_value_dict)
         try:
-            complete_api_link = "https://api.openweathermap.org/data/2.5/weather?q="+self.city_name+"&appid="+self.user_api
+            # Try to connect to open weathermap api & get api response
+            # Note: ?->beginn query param, &->append query param, %->wildcard/space
+            api_url = "https://api.openweathermap.org/data/2.5/weather"
+            query_param_1 = "q="+self.city_name
+            query_param_2 = "appid="+self.user_api
+            query_param_3 = "units="+self.units
+            complete_api_link = api_url + "?" + query_param_1 + "&" + query_param_2 + "&" + query_param_3
             response = requests.get(complete_api_link)
             api_data = response.json()
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err: 
-            #Connected to Server successfully BUT API link was not accepted
-            print("HTTP-Error:"+str(api_data['cod'])+" "+api_data['message'])
-            error_code = "API-Error: URL not accepted."
+            # Set error code if no error occurred
+            error_code = None
             return api_data, error_code
-            #raise SystemExit(err)
+        except requests.exceptions.HTTPError as err: 
+            # Connection to weathermap api successed 
+            # BUT query parameters appended to the url were not accepted.
+            # Set error code if query parametere were not accepted
+            error_code = str(str(api_data['cod'])+": "+api_data['message'])
+            # Set api_data to Null
+            api_data = None
+            return api_data, error_code
         except (requests.exceptions.ConnectionError, 
                 requests.exceptions.ConnectTimeout) as err:
-            #Error message when Connection failed/timed out. 
-            #city name & user api may be correct but remaining link is incorrect
-            print("Connection to api.openweathermaps.org failed.")
-            error_code = "API-Error: Connection failed."
-            return api_data, error_code
-            #raise SystemExit(err)    
-        else: 
-            error_code = None
+            # Connection to weathermap api failed or timed out. 
+            # Set api_data to Null
+            api_data = None
+            # Set error code if Connection to OpenWeatherMaps API failed/timed out. 
+            error_code = "URL may be correct but connection to weathermap api failed/timed out."
             return api_data, error_code
         
