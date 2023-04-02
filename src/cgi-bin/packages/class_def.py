@@ -25,7 +25,8 @@ class Time():
         d = "{:02d}".format(self.day)
         m = "{:02d}".format(self.month)
         y = "{:04d}".format(self.year)
-        return f"{y}-{m}-{d}"
+        return f"{d}.{m}.{y}"
+
     def getTime(self):
         h = "{:02d}".format(self.hour)
         m = "{:02d}".format(self.minute)
@@ -41,10 +42,12 @@ class Location(Time):
         self.country =  country
 
 class Wind(Location):
-    def __init__(self, wind_speed, wind_direction, name, country, longitude, latitude, timestamp, timezone):
+    def __init__(self, wind_speed, wind_direction, wind_gust, 
+                 name, country, longitude, latitude, timestamp, timezone):
         Location.__init__(self,name,longitude, latitude, country, timestamp, timezone)
         self.speed = wind_speed
-        self.direction = wind_direction    
+        self.direction = wind_direction  
+        self.gust = wind_gust  
     def getDirectionPoint(self):
         if(self.direction>337.5):
             return 'North'
@@ -65,7 +68,8 @@ class Wind(Location):
         return 'North'           
 
 class Weather(Location): 
-    def __init__(self,temperatur,min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, name, country, longitude, latitude, timestamp, timezone):
+    def __init__(self,temperatur,min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness,       visibility, humidity, pressure, 
+                name, country, longitude, latitude, timestamp, timezone):
         Location.__init__(self, name, longitude, latitude, country, timestamp, timezone)
         self.current_temperatur = temperatur
         self.min_temperatur = min_temperatur
@@ -74,23 +78,21 @@ class Weather(Location):
         self.weather_descr = weather_descr
         self.cloudiness = cloudiness
         self.visibility = visibility  
+        self.humidity = humidity
+        self.pressure = pressure
 
 class Sun(Location):
-    def __init__(self, timestamp_sunrise, timestamp_sunset, name, country, longitude, latitude, timestamp, timezone):
+    def __init__(self, timestamp_sunrise, timestamp_sunset, 
+                 name, country, longitude, latitude, timestamp, timezone):
         Location.__init__(self, name, longitude, latitude, country ,timestamp, timezone)
         self.sunrise = Time(timestamp_sunrise, timezone)
         self.sunset = Time(timestamp_sunset, timezone)
         self.azimuth, self.elevation  = self._SunPosition()
-    def getAzimuth(self):
-        return self.azimuth
-    def getElevation(self):
-        return self.elevation
-    def getSunPosition(self):
-        return self.azimuth, self.elevation
     def _SunPosition(self):
         ''' 
         Calculate Azimuth and Elevation
-        Source (modified): https://levelup.gitconnected.com/python-sun-position-for-solar-energy-and-research-7a4ead801777
+        Source (modified): 
+        https://levelup.gitconnected.com/python-sun-position-for-solar-energy-and-research-7a4ead801777
         '''
         refraction = True
         year = self.year
@@ -159,57 +161,81 @@ class Sun(Location):
 
 class WeatherInformation(Sun,Weather,Wind):
     '''
-    Construct Weather Information Object.
+    Construct Weather Information Object
+    that holds the child classes Sun, Weather & Wind. 
     '''
-    def __init__(self, timestamp_sunrise, timestamp_sunset, current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, wind_speed, wind_direction, name, country, longitude, latitude, timestamp, timezone):
-        Sun.__init__(self,timestamp_sunrise, timestamp_sunset, name, country, longitude, latitude, timestamp, timezone)
-        Weather.__init__(self,current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, name, country, longitude, latitude, timestamp, timezone)
-        Wind.__init__(self,wind_speed, wind_direction, name, country, longitude, latitude, timestamp, timezone)
+    def __init__(self, timestamp_sunrise, timestamp_sunset, 
+                 current_temperatur, min_temperatur, max_temperatur, feel_temperatur, 
+                 weather_descr, cloudiness, visibility, humidity, pressure,
+                 wind_speed, wind_direction, wind_gust,
+                 name, country, longitude, latitude, timestamp, timezone):
+        Sun.__init__(self,timestamp_sunrise, timestamp_sunset, 
+                     name, country, longitude, latitude, timestamp, timezone)
+        Weather.__init__(self,current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, humidity, pressure, 
+                        name, country, longitude, latitude, timestamp, timezone)
+        Wind.__init__(self,wind_speed, wind_direction, wind_gust,
+                      name, country, longitude, latitude, timestamp, timezone)
 
 class CallOpenWeatherMapAPI():
     '''
-    error_code: 
-    (None) if no error occured,
-    (str) "API-Error: URL not accepted." if connection was successful but the URL was not accepted, 
-    (str) "API-Error: Connection failed." if connection to failed. 
-    api_data:
-    (tuple) if no api error occured
-    (None) if Connection failed & URL was not accepted. 
+    Fetches & returns content from OpenWeatherMap API as well as the API status. 
+    :return error_code & : 
+    - (int) 200 if no error occured,
+    - ...
+    :return api_data:
+    - (tuple) if no API error occured
+    - (None) if an API error occured 
     '''
     def __init__(self,city_name:str,user_api:str):
         self.city_name                  = city_name
         self.user_api                   = user_api
-        self.units                      = "metric" # api is called with metric system by default
-        self.api_data, self.error_code  = self._callAPI()
+        self.units                      = "metric"                          # api is called with metric system by default
+        self.api_data, self.api_code, self.api_msg  = self._callAPI()   # !PRODUCTION!
+        #self.api_data, self.error_code  = self._callofflineAPI()           # !TESTING w/ API Emulator! 
+
+    def _callofflineAPI(self):
+        # For Testing with OpenWeatherMaps Server Emulator, running locally. 
+        # Use repository "API EMULATOR"
+        api_url = "http://127.0.0.1:8080/api/weatherinfomation/openweathermaps/emulator"
+        response = requests.get(api_url)
+        api_data = response.json()
+        print(api_data)
+        api_code = None
+        api_msg = None
+        return api_data, api_code, api_msg 
+    
     def _callAPI(self):
         try:
             # Try to connect to open weathermap api & get api response
-            # Note: ?->beginn query param, &->append query param, %->wildcard/space
             api_url = "https://api.openweathermap.org/data/2.5/weather"
             query_param_1 = "q="+self.city_name
             query_param_2 = "appid="+self.user_api
             query_param_3 = "units="+self.units
             complete_api_link = api_url + "?" + query_param_1 + "&" + query_param_2 + "&" + query_param_3
+            # fetch content
             response = requests.get(complete_api_link)
             api_data = response.json()
             response.raise_for_status()
-            # Set error code if no error occurred
-            error_code = None
-            return api_data, error_code
+            # Set error code & msg if no error occurred
+            api_code = 200
+            api_msg = None
+            return api_data, api_code, api_msg
         except requests.exceptions.HTTPError as err: 
             # Connection to weathermap api successed 
             # BUT query parameters appended to the url were not accepted.
             # Set error code if query parametere were not accepted
-            error_code = str(str(api_data['cod'])+": "+api_data['message'])
+            api_code = int(api_data['cod'])
+            api_msg = str("OpenWeatherMaps API Error:" + api_data['message'])
             # Set api_data to Null
             api_data = None
-            return api_data, error_code
+            return api_data, api_code, api_msg
         except (requests.exceptions.ConnectionError, 
                 requests.exceptions.ConnectTimeout) as err:
             # Connection to weathermap api failed or timed out. 
             # Set api_data to Null
             api_data = None
             # Set error code if Connection to OpenWeatherMaps API failed/timed out. 
-            error_code = "URL may be correct but connection to weathermap api failed/timed out."
-            return api_data, error_code
+            error_code = 408
+            api_msg = "Connection to OpenWeatherMap API failed/timed out."
+            return api_data, api_code, api_msg
         
