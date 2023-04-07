@@ -235,7 +235,7 @@ class CallOpenWeatherMapAPI():
             # Set api_data to Null
             api_data = None
             # Set error code if Connection to OpenWeatherMaps API failed/timed out. 
-            error_code = 408
+            api_code = 408
             api_msg = "Connection to OpenWeatherMap API failed/timed out."
             return api_data, api_code, api_msg
         

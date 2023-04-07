@@ -89,7 +89,8 @@ def weatherinformation():
                     }
                 }        
             }
-    
+    del weatherdata
+
     # Third, add API status to payload dict. 
     error_key_dict_add = {
         'api':{
@@ -101,6 +102,7 @@ def weatherinformation():
 
     # Finally, place payload dict in http response.  
     response = make_response(jsonify(payload))
+    del payload
     return response
 
 @app.route('/current/openweathermaps', methods=['GET'])
@@ -108,6 +110,7 @@ def weatherinformation_oc():
     location = request.args.get("location", None)
     openweathermaps_api_key = request.args.get("openweathermaps_api_key", None)
     # plane display of the original content provided by the OpenWeatherMap API's response. 
-    api_data, _ , _ , _ = WeatherInfo(city_name=location,user_api=openweathermaps_api_key) 
+    api_data, _ , _ , _ = WeatherInfo(city_name=location,user_api=openweathermaps_api_key)
     response = make_response(jsonify(api_data))
+    del api_data
     return response
