@@ -81,6 +81,8 @@ def WeatherInfo(city_name:str, user_api:str):
         direction           = api_data.get('wind', {}).get('deg')                           #wind direction in deg 
         gust                = api_data.get('wind', {}).get('gust')                          #wind gust in km/h
 
+        del api_call
+
         # Fourth, construct an object of class "WeatherInformation" with the extracted data. 
         # This object holds all the finalized weatherinformations. 
         weatherinfo = WeatherInformation(
