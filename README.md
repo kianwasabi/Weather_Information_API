@@ -19,7 +19,7 @@ Feel free to use, deploy on own CGI and generate enhance via pull requests. Enjo
 <h2>Getting Started</h2>
 <h3>How to use</h3>
 <p>Easy to use: <br> 
-Run the API by: https://weatherinformation.info + <a>href="#endpoints">Endpoints</a> </br>
+Run the API by: https://weatherinformation.info + <a href="#endpoints">Endpoints</a> </br>
 </p>
 <h3>How to deploy</h3>
 <p>Prerequisites: Server runs python3 </br>
