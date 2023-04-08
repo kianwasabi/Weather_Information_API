@@ -1,10 +1,7 @@
-# Status: 
-Published V1 20230401 </br>
-README.md in progress
-
 <h1>Weather Information API</h1>
-<p>A brief description of your API.<b>
-Feel free to use, deploy on own CGI and generate enhance via pull requests. Enjoy! </p>
+<p>This Weather Information API provides a bulky pile of information about wind, weather, sun, and air quality in a designated area.</p>
+<p>Feel free to use this API, fork the project to deploy on own CGI or enhance the code with a pull requests. </p>
+<p>Enjoy! </p>
 <h2>Table of Contents</h2>
 <ul>
   <li><a href="#getting-started">Getting Started</a></li>
