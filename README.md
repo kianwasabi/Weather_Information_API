@@ -3,7 +3,8 @@ Published V1 20230401 </br>
 README.md in progress
 
 <h1>Weather Information API</h1>
-<p>A brief description of your API.</p>
+<p>A brief description of your API.<b>
+Feel free to use, deploy on own CGI and generate enhance via pull requests. Enjoy! </p>
 <h2>Table of Contents</h2>
 <ul>
   <li><a href="#getting-started">Getting Started</a></li>
@@ -11,14 +12,19 @@ README.md in progress
   <li><a href="#error-handling">Error Handling</a></li>
   <li><a href="#authentication">Authentication</a></li>
   <li><a href="#rate-limiting">Rate Limiting</a></li>
-  <li><a href="#testing-deployment">Testing&Deployment</a></li>
+  <li><a href="#version">Version</a></li>
   <li><a href="#built-with">Built With</a></li>
   <li><a href="#license">License</a></li>
 </ul>
 <h2>Getting Started</h2>
-<p>Install dependencies: </br>
-Run the API: https://weatherinformation.info</br>
-Other prerequisites.</br> </p>
+<h3>How to use</h3>
+<p>Easy to use: <br> 
+Run the API by: https://weatherinformation.info + <a>href="#endpoints">Endpoints</a> </br>
+</p>
+<h3>How to deploy</h3>
+<p>Prerequisites: Server runs python3 </br>
+<p>Dependencies: Install dependencies given in the requirements.txt </br>
+</p>
 <h2>Endpoints</h2>
 <p>List the endpoints that your API supports. Include a brief description of what each endpoint does and any required parameters. </p>
 <h3>/current?location=INSERT_LOCATION_NAME&openweathermaps_api_key=INSERT_API_KEY</h3>
@@ -106,6 +112,7 @@ Other prerequisites.</br> </p>
 <p>If your API requires authentication, describe how authentication works. Include information on how to generate API keys, how to authenticate requests, and any other relevant details.</p>
 <h2>Rate Limiting</h2>
 <p>If your API has rate limiting, describe how it works. Include information on how many requests are allowed per minute, how to check the current rate limit status, and any other relevant details.</p>
-<h2>testing-deployment</h2>
+<h2>version</h2>
+<p>Published V1 20230401</p>
 <h2>built-with</h2>
 <h2>license</h2>
