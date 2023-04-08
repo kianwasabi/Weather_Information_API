@@ -22,12 +22,10 @@ Feel free to use, deploy on own CGI and generate enhance via pull requests. Enjo
 Run the API by: https://weatherinformation.info + <a href="#endpoints">Endpoints</a> </br>
 </p>
 <h3>How to deploy</h3>
-<p>Prerequisites: Server runs python3 </br>
-<p>Dependencies: Install dependencies given in the requirements.txt </br>
+<p>Prerequisites & Dependencies: Server should support python3. Furthermore, all needed dependencies are given in the requirements.txt file.
 </p>
 <h2>Endpoints</h2>
-<p>List the endpoints that your API supports. Include a brief description of what each endpoint does and any required parameters. </p>
-<h3>/current?location=INSERT_LOCATION_NAME&openweathermaps_api_key=INSERT_API_KEY</h3>
+<h3>/current?location="LOCATION"&openweathermaps_api_key="APPID"</h3>
 <p>Retrieves a list of all weatherinformations.</p>
 <h4>methode</h4>
 <ul>
@@ -108,6 +106,26 @@ Run the API by: https://weatherinformation.info + <a href="#endpoints">Endpoints
 
 <h2>Error Handling</h2>
 <p>Describe how your API handles errors. Include information on the types of errors that might be returned, as well as any error codes and messages.</p>
+<p>API Error Codes:</p>
+<p>internal or thrown by sub api usage</p>
+<table>
+    <tr>
+        <th>HTTP Status Code</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>200</td>
+        <td>no errors occured</td>
+    </tr>
+    <tr>
+        <td>401</td>
+        <td>OpenWeatherMaps API Error: City not found. </td>
+    </tr>
+    <tr>
+        <td>402</td>
+        <td>OpenWeatherMaps API Error: API Key not accepted. </td>
+    </tr>
+</table> 
 <h2>Authentication</h2>
 <p>If your API requires authentication, describe how authentication works. Include information on how to generate API keys, how to authenticate requests, and any other relevant details.</p>
 <h2>Rate Limiting</h2>
