@@ -104,15 +104,12 @@
 <p>Describe how your API handles errors. Include information on the types of errors that might be returned, as well as any error codes and messages.</p>
 <p>API Error Codes:</p>
 <p>Errors can be thrown internally by the server or been recieved by calling another api like openweathermaps. All Errors are displayed in the response as followed: </p>
-<pre>
-<code>
+<pre><code>
 "api":{
     "code": HTTP STATUS CODE,
     "msg":  Description
     }
-<pre>
-<code>
-
+</code></pre>
 <table>
     <tr>
         <th>HTTP Status Code (code) </th>
