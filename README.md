@@ -15,8 +15,7 @@
 </ul>
 <h2>Getting Started</h2>
 <h3>How to use</h3>
-<p>Easy to use: <br> 
-Run the API by: https://weatherinformation.info + <a href="#endpoints">Endpoints</a> </br>
+<p>Easy to use, just call the API by: https://weatherinformation.info + <a href="#endpoints">Endpoints</a> </br>
 </p>
 <h3>How to deploy</h3>
 <p>Prerequisites & Dependencies: Server should support python3. Furthermore, all needed dependencies are given in the requirements.txt file.
@@ -104,23 +103,36 @@ Run the API by: https://weatherinformation.info + <a href="#endpoints">Endpoints
 <h2>Error Handling</h2>
 <p>Describe how your API handles errors. Include information on the types of errors that might be returned, as well as any error codes and messages.</p>
 <p>API Error Codes:</p>
-<p>internal or thrown by sub api usage</p>
+<p>Errors can be thrown internally by the server or been recieved by calling another api like openweathermaps. All Errors are displayed in the response as followed: </p>
+<pre>
+<code>
+"api":{
+    "code": HTTP STATUS CODE,
+    "msg":  Description
+    }
+<pre>
+<code>
+
 <table>
     <tr>
-        <th>HTTP Status Code</th>
-        <th>Description</th>
+        <th>HTTP Status Code (code) </th>
+        <th>HTTP Status Message (msg) </th>
+        <th>Description </th>
     </tr>
     <tr>
         <td>200</td>
-        <td>no errors occured</td>
+        <td> </td>
+        <td>No errors occured.</td>
     </tr>
     <tr>
         <td>401</td>
         <td>OpenWeatherMaps API Error: City not found. </td>
+        <td> </td>
     </tr>
     <tr>
         <td>402</td>
         <td>OpenWeatherMaps API Error: API Key not accepted. </td>
+        <td> </td>
     </tr>
 </table> 
 <h2>Authentication</h2>
