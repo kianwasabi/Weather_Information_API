@@ -1,19 +1,5 @@
 from .class_def import CallOpenWeatherMapAPI, WeatherInformation
 
-def get_nested_value(nested_dict, keys, default_value="Not Present"):
-    """
-    :param nested_dict: Ein verschachteltes Dictionary-Objekt.
-    :param keys: Eine Liste von Schlüsseln, die den Pfad zum gesuchten Wert im Dictionary darstellen.
-    :param default_value: Der Defaultwert, der zurückgegeben wird, wenn ein Schlüssel in der Liste nicht im Dictionary enthalten ist.
-    :return: Der Wert, der dem angegebenen Schlüsselpfad im Dictionary entspricht, oder der Defaultwert, wenn ein Schlüssel nicht gefunden wurde.
-    """
-    current_dict = nested_dict
-    for key in keys:
-        if key not in current_dict:
-            return default_value
-        current_dict = current_dict[key]
-    return current_dict
-
 def WeatherInfo(city_name:str, user_api:str):
     '''
     Provides weather information for a location by 
@@ -68,7 +54,7 @@ def WeatherInfo(city_name:str, user_api:str):
         unix_sunrise        = api_data.get('sys', {}).get('sunrise')                        #timestamp (unix, UTC, epoch)
         unix_sunset         = api_data.get('sys', {}).get('sunset')                         #timestamp (unix, UTC, epoch)
         visibility          = api_data.get('visibility')
-        weather_description = api_data['weather'][0]['description']
+        weather_description = api_data.get('weather',{})[0].get('description',{})
         temperatur          = api_data.get('main', {}).get('temp')                          #current temp in C (API call is metric)
         #temperatur          = round(((api_data.get('main', {}).get('temp'))-273.15),3      #current temp in F (API call is imperial)
         temperatur_min      = api_data.get('main', {}).get('temp_min')                      #min temp in C
@@ -80,9 +66,16 @@ def WeatherInfo(city_name:str, user_api:str):
         speed               = api_data.get('wind', {}).get('speed')                         #wind speed in km/h 
         direction           = api_data.get('wind', {}).get('deg')                           #wind direction in deg 
         gust                = api_data.get('wind', {}).get('gust')                          #wind gust in km/h
-
-        del api_call
-
+        quality_index       = api_data.get('list',{})[0].get('main',{}).get('aqi')
+        CO_concentration    = api_data.get('list',{})[0].get('components',{}).get('co')
+        NO_concentration    = api_data.get('list',{})[0].get('components',{}).get('no')
+        NO2_concentration   = api_data.get('list',{})[0].get('components',{}).get('no2')
+        O3_concentration    = api_data.get('list',{})[0].get('components',{}).get('o3')
+        SO2_concentration   = api_data.get('list',{})[0].get('components',{}).get('so2')
+        PM2_5_concentration = api_data.get('list',{})[0].get('components',{}).get('pm2_5')
+        PM10_concentration  = api_data.get('list',{})[0].get('components',{}).get('pm10')
+        NH3_concentration   = api_data.get('list',{})[0].get('components',{}).get('nh3')
+        print(NH3_concentration)
         # Fourth, construct an object of class "WeatherInformation" with the extracted data. 
         # This object holds all the finalized weatherinformations. 
         weatherinfo = WeatherInformation(
@@ -98,6 +91,15 @@ def WeatherInfo(city_name:str, user_api:str):
             wind_speed          = speed,
             wind_direction      = direction,
             wind_gust           = gust,
+            quality_index       = quality_index,
+            CO_concentration    = CO_concentration,
+            NO_concentration    = NO_concentration,
+            NO2_concentration   = NO2_concentration, 
+            O3_concentration    = O3_concentration,
+            SO2_concentration   = SO2_concentration,
+            PM2_5_concentration = PM2_5_concentration,
+            PM10_concentration  = PM10_concentration,
+            NH3_concentration   = NH3_concentration,
             name                = city_name,
             country             = country_code,
             longitude           = longitude,
@@ -107,6 +109,7 @@ def WeatherInfo(city_name:str, user_api:str):
             timestamp           = unix_location,
             timezone            = timezone
             )
+    del api_call   
     # Finally, return the original OpenWeatherMap API data in "api_data", 
     # the WeatherInformation object (that holds all needed information),
     # and the API status and message. 

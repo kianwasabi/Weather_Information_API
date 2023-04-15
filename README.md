@@ -21,7 +21,7 @@
 <p>Prerequisites & Dependencies: Server should support python3. Furthermore, all needed dependencies are given in the requirements.txt file.
 </p>
 <h2>Endpoints</h2>
-<h3>/current?location="LOCATION"&openweathermaps_api_key="APPID"</h3>
+<h3>/current?location={LOCATION}&openweathermaps_api_key={APPID}</h3>
 <p>Retrieves a list of all weatherinformations.</p>
 <h4>methode</h4>
 <ul>
@@ -106,8 +106,8 @@
 <p>Errors can be thrown internally by the server or been recieved by calling another api like openweathermaps. All Errors are displayed in the response as followed: </p>
 <pre><code>
 "api":{
-    "code": HTTP STATUS CODE,
-    "msg":  Description
+    "code": HTTP Status Code (code),
+    "msg":  HTTP Status Message (msg)
     }
 </code></pre>
 <table>

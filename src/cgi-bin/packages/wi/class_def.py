@@ -1,6 +1,26 @@
 import  math
 import  requests
 from    datetime import datetime
+from    pvlib    import location
+
+def deg2point(value):
+    if(value>337.5):
+        return 'North'
+    if(value>292.5):
+        return 'North-West'
+    if(value>247.5):
+        return 'West'
+    if(value>202.5):
+        return 'South-West'
+    if(value>157.5):
+        return 'South'
+    if(value>122.5):
+        return 'South-East'
+    if(value>67.5):
+        return 'East'
+    if(value>22.5):
+        return 'Norht-East'
+    return 'North'
 
 class Time(): 
     def __init__(self, timestamp , timezone):
@@ -26,7 +46,6 @@ class Time():
         m = "{:02d}".format(self.month)
         y = "{:04d}".format(self.year)
         return f"{d}.{m}.{y}"
-
     def getTime(self):
         h = "{:02d}".format(self.hour)
         m = "{:02d}".format(self.minute)
@@ -40,6 +59,25 @@ class Location(Time):
         self.longitude = longitude
         self.latitude = latitude
         self.country =  country
+        self.altitute = location.lookup_altitude(latitude, longitude)
+
+class Air(Location): 
+    def __init__(self, humidity, pressure, quality_index, 
+                 CO_concentration, NO_concentration, NO2_concentration, O3_concentration, SO2_concentration, 
+                 PM2_5_concentration, PM10_concentration, NH3_concentration,
+                 name, country, longitude, latitude, timestamp, timezone):
+        Location.__init__(self,name,longitude, latitude, country, timestamp, timezone)
+        self.humidity = humidity
+        self.pressure = pressure
+        self.quality_index = quality_index
+        self.CO_concentration = CO_concentration
+        self.NO_concentration = NO_concentration
+        self.NO2_concentration = NO2_concentration
+        self.O3_concentration = O3_concentration
+        self.SO2_concentration = SO2_concentration
+        self.PM2_5_concentration = PM2_5_concentration
+        self.PM10_concentration = PM10_concentration
+        self.NH3_concentration = NH3_concentration
 
 class Wind(Location):
     def __init__(self, wind_speed, wind_direction, wind_gust, 
@@ -49,26 +87,10 @@ class Wind(Location):
         self.direction = wind_direction  
         self.gust = wind_gust  
     def getDirectionPoint(self):
-        if(self.direction>337.5):
-            return 'North'
-        if(self.direction>292.5):
-            return 'North-West'
-        if(self.direction>247.5):
-            return 'West'
-        if(self.direction>202.5):
-            return 'South-West'
-        if(self.direction>157.5):
-            return 'South'
-        if(self.direction>122.5):
-            return 'South-East'
-        if(self.direction>67.5):
-            return 'East'
-        if(self.direction>22.5):
-            return 'Norht-East'
-        return 'North'           
+        return deg2point(self.direction)         
 
 class Weather(Location): 
-    def __init__(self,temperatur,min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness,       visibility, humidity, pressure, 
+    def __init__(self,temperatur,min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, 
                 name, country, longitude, latitude, timestamp, timezone):
         Location.__init__(self, name, longitude, latitude, country, timestamp, timezone)
         self.current_temperatur = temperatur
@@ -78,8 +100,6 @@ class Weather(Location):
         self.weather_descr = weather_descr
         self.cloudiness = cloudiness
         self.visibility = visibility  
-        self.humidity = humidity
-        self.pressure = pressure
 
 class Sun(Location):
     def __init__(self, timestamp_sunrise, timestamp_sunset, 
@@ -139,47 +159,37 @@ class Sun(Location):
             targ = rad((elevation + (10.3 / (elevation + 5.11))))
             elevation += (1.02 / tan(targ)) / 60
         return round(azimuth, 2), round(elevation, 2)
-
     def getAzimuthPoint(self):
-        if(self.azimuth>337.5):
-            return 'North'
-        if(self.azimuth>292.5):
-            return 'North-West'
-        if(self.azimuth>247.5):
-            return 'West'
-        if(self.azimuth>202.5):
-            return 'South-West'
-        if(self.azimuth>157.5):
-            return 'South'
-        if(self.azimuth>122.5):
-            return 'South-East'
-        if(self.azimuth>67.5):
-            return 'East'
-        if(self.azimuth>22.5):
-            return 'Norht-East'
-        return 'North'
+        return deg2point(self.azimuth)
 
-class WeatherInformation(Sun,Weather,Wind):
+class WeatherInformation(Sun,Weather,Wind,Air):
     '''
     Construct Weather Information Object
     that holds the child classes Sun, Weather & Wind. 
     '''
     def __init__(self, timestamp_sunrise, timestamp_sunset, 
                  current_temperatur, min_temperatur, max_temperatur, feel_temperatur, 
-                 weather_descr, cloudiness, visibility, humidity, pressure,
+                 weather_descr, cloudiness, visibility,
                  wind_speed, wind_direction, wind_gust,
+                 humidity, pressure, quality_index, 
+                 CO_concentration, NO_concentration, NO2_concentration, O3_concentration, SO2_concentration, 
+                 PM2_5_concentration, PM10_concentration, NH3_concentration,
                  name, country, longitude, latitude, timestamp, timezone):
         Sun.__init__(self,timestamp_sunrise, timestamp_sunset, 
                      name, country, longitude, latitude, timestamp, timezone)
-        Weather.__init__(self,current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility, humidity, pressure, 
+        Weather.__init__(self,current_temperatur, min_temperatur,max_temperatur,feel_temperatur, weather_descr, cloudiness, visibility,
                         name, country, longitude, latitude, timestamp, timezone)
         Wind.__init__(self,wind_speed, wind_direction, wind_gust,
                       name, country, longitude, latitude, timestamp, timezone)
+        Air.__init__(self, humidity, pressure, quality_index, 
+                    CO_concentration, NO_concentration, NO2_concentration, O3_concentration, SO2_concentration, 
+                    PM2_5_concentration, PM10_concentration, NH3_concentration,
+                    name, country, longitude, latitude, timestamp, timezone)       
 
 class CallOpenWeatherMapAPI():
     '''
     Fetches & returns content from OpenWeatherMap API as well as the API status. 
-    :return error_code & : 
+    :return error_code: 
     - (int) 200 if no error occured,
     - ...
     :return api_data:
@@ -190,12 +200,12 @@ class CallOpenWeatherMapAPI():
         self.city_name                  = city_name
         self.user_api                   = user_api
         self.units                      = "metric"                          # api is called with metric system by default
-        self.api_data, self.api_code, self.api_msg  = self._callAPI()   # !PRODUCTION!
+        self.api_data, self.api_code, self.api_msg  = self._callOpenWeahterMapsAPI()   # !PRODUCTION!
         #self.api_data, self.error_code  = self._callofflineAPI()           # !TESTING w/ API Emulator! 
 
     def _callofflineAPI(self):
-        # For Testing with OpenWeatherMaps Server Emulator, running locally. 
-        # Use repository "API EMULATOR"
+        # For testing with OpenWeatherMaps Server Emulator, running locally. 
+        # Use repository "API EMULATOR"!
         api_url = "http://127.0.0.1:8080/api/weatherinfomation/openweathermaps/emulator"
         response = requests.get(api_url)
         api_data = response.json()
@@ -204,26 +214,45 @@ class CallOpenWeatherMapAPI():
         api_msg = None
         return api_data, api_code, api_msg 
     
-    def _callAPI(self):
-        try:
-            # Try to connect to open weathermap api & get api response
-            api_url = "https://api.openweathermap.org/data/2.5/weather"
+    def _callOpenWeahterMapsAPI(self):
+        try: 
+            # Try to connect to several OpenWeatherMaps API endpoints
+            # First, the geocoding API endpoint to get lat. & long. for a location name
+            api_url = "http://api.openweathermap.org/geo/1.0/direct"
             query_param_1 = "q="+self.city_name
-            query_param_2 = "appid="+self.user_api
-            query_param_3 = "units="+self.units
+            query_param_2 = "limit="+"1"
+            query_param_3 = "appid="+self.user_api
             complete_api_link = api_url + "?" + query_param_1 + "&" + query_param_2 + "&" + query_param_3
-            # fetch content
             response = requests.get(complete_api_link)
             api_data = response.json()
             response.raise_for_status()
-            # Set error code & msg if no error occurred
+            lat = api_data[0]['lat']
+            lon = api_data[0]['lon']
+            # Second, the current weather endpoint to get current weatherinformation
+            api_url = "https://api.openweathermap.org/data/2.5/weather"
+            query_param_1 = "lat="+str(lat)
+            query_param_2 = "lon="+str(lon)
+            query_param_3 = "appid="+self.user_api
+            query_param_4 = "units="+self.units
+            complete_api_link = api_url + "?" + query_param_1 + "&" + query_param_2 + "&" + query_param_3 + "&" + query_param_4
+            response = requests.get(complete_api_link)
+            api_data = response.json()
+            response.raise_for_status()
+            # Third, the current air pollution endpoint
+            api_url = "http://api.openweathermap.org/data/2.5/air_pollution"
+            query_param_1 = "lat="+str(lat)
+            query_param_2 = "lon="+str(lon)
+            query_param_3 = "appid="+self.user_api
+            complete_api_link = api_url + "?" + query_param_1 + "&" + query_param_2 + "&" + query_param_3
+            response = requests.get(complete_api_link)
+            api_data.update(response.json())
+            response.raise_for_status()
+            # Finally, set error code & msg if no error occurred
             api_code = 200
             api_msg = None
             return api_data, api_code, api_msg
         except requests.exceptions.HTTPError as err: 
-            # Connection to weathermap api successed 
-            # BUT query parameters appended to the url were not accepted.
-            # Set error code if query parametere were not accepted
+            # Connection to weathermap endpoint succeeded but q-param were not accepted.
             api_code = int(api_data['cod'])
             api_msg = str("OpenWeatherMaps API Error:" + api_data['message'])
             # Set api_data to Null

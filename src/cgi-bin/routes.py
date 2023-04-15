@@ -1,7 +1,7 @@
 import dependencies
 from flask import Flask,  make_response , request, jsonify
 from flask_cors import CORS
-from packages.weather_Information import WeatherInfo
+from packages.wi.weather_Information import WeatherInfo
 from collections import defaultdict
 
 # create flask application 
@@ -11,7 +11,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # define routes
 @app.route('/current', methods=['GET'])
 def weatherinformation():
-
     # Get query parameters/keys from url.
     location = request.args.get("location", None)
     openweathermaps_api_key = request.args.get("openweathermaps_api_key", None)
@@ -35,6 +34,7 @@ def weatherinformation():
                 'country'   : weatherdata.country,
                 'longitude' : weatherdata.longitude,
                 'latitude'  : weatherdata.latitude,
+                'altitute'  : weatherdata.altitute,
                 'time': {
                     'stamp_unix': weatherdata.UNIXtimestamp, 
                     'zone_unix': weatherdata.UNIXtimezone,
@@ -76,8 +76,6 @@ def weatherinformation():
                 'gust': weatherdata.gust
                 },
             'weather':  {
-                'pressure' : weatherdata.pressure, 
-                'humidity': weatherdata.humidity,
                 'discription': weatherdata.weather_descr,
                 'visibility' : weatherdata.visibility,
                 'cloudiness': weatherdata.cloudiness,
@@ -87,7 +85,22 @@ def weatherinformation():
                     'min': weatherdata.min_temperatur,
                     'feel': weatherdata.feel_temperatur
                     }
-                }        
+                },
+            'air': {
+                'pressure' : weatherdata.pressure, 
+                'humidity': weatherdata.humidity,
+                'quality_index': weatherdata.quality_index,
+                'concentration': {
+                    'CO': weatherdata.CO_concentration,
+                    'NO': weatherdata.NO_concentration,
+                    'NO2': weatherdata.NO2_concentration,
+                    'O3': weatherdata.O3_concentration,
+                    'SO2': weatherdata.SO2_concentration,
+                    'PM2_5': weatherdata.PM2_5_concentration,
+                    'PM10': weatherdata.PM10_concentration,
+                    'NH3': weatherdata.NH3_concentration,
+                    }
+                }
             }
     del weatherdata
 

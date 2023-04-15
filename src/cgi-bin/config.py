@@ -6,8 +6,8 @@
 # Therefore, run.py & config.py are only meant for development on a local machine.  
 # !! The flask application is executed in production with the routes.py file. 
 
-# import socket
+import socket
 
-# hostname = socket.gethostname()
-# hostIP = socket.gethostbyname(hostname)
-# port = 8080
+hostname = socket.gethostname()
+hostIP = socket.gethostbyname(hostname)
+port = 8080
