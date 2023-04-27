@@ -101,7 +101,6 @@
 </pre>
 
 <h2>Error Handling</h2>
-<p>Describe how your API handles errors. Include information on the types of errors that might be returned, as well as any error codes and messages.</p>
 <p>API Error Codes:</p>
 <p>Errors can be thrown internally by the server or been recieved by calling another api like openweathermaps. All Errors are displayed in the response as followed: </p>
 <pre><code>
@@ -136,7 +135,8 @@
 <p>If your API requires authentication, describe how authentication works. Include information on how to generate API keys, how to authenticate requests, and any other relevant details.</p>
 <h2>Rate Limiting</h2>
 <p>If your API has rate limiting, describe how it works. Include information on how many requests are allowed per minute, how to check the current rate limit status, and any other relevant details.</p>
-<h2>version</h2>
+<h2>Version</h2>
 <p>Published V1 20230401</p>
-<h2>built-with</h2>
+<h2>Built-with</h2>
+<p>flask</p>
 <h2>license</h2>
