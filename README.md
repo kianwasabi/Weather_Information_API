@@ -1,4 +1,4 @@
-<h1>Weather Information API</h1>
+<h1>Weather Information Rest API</h1>
 <p>This Weather Information API provides a bulky pile of information about wind, weather, sun, and air quality in a designated area.</p>
 <p>Feel free to use this API, fork the project to deploy on own CGI or enhance the code with a pull requests. </p>
 <p>Enjoy! </p>
