@@ -132,9 +132,9 @@
     </tr>
 </table> 
 <h2>Authentication</h2>
-<p>If your API requires authentication, describe how authentication works. Include information on how to generate API keys, how to authenticate requests, and any other relevant details.</p>
+<p>V1 requires a openweahtermaps API authentication (see above).</p>
 <h2>Rate Limiting</h2>
-<p>If your API has rate limiting, describe how it works. Include information on how many requests are allowed per minute, how to check the current rate limit status, and any other relevant details.</p>
+<p>V1 does not have a rate limiting. Requests are limited to XXX calls per minute.</p>
 <h2>Version</h2>
 <p>Published V1 20230401</p>
 <h2>Built-with</h2>
