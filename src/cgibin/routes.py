@@ -1,22 +1,23 @@
 import dependencies
 from flask import Flask,  make_response , request, jsonify
 from flask_cors import CORS
-from packages.wi.weather_Information import WeatherInfo
+from packages.weatherinfo.weather_Information import WeatherInfo
 from collections import defaultdict
 
-# create flask application 
+# Create flask application
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Cross-Origin Resource Sharing ‚
+#CORS(app, resources={r"/*": {"origins": "*"}})
 
 # define routes
-@app.route('/current', methods=['GET'])
+@app.route('/api/current', methods=['GET'])
 def weatherinformation():
-    # Get query parameters/keys from url.
+    
+    # Get query parameters/keys from url
     location = request.args.get("location", None)
     openweathermaps_api_key = request.args.get("openweathermaps_api_key", None)
 
-    # Use the weather_information package to get data in the weatherdata object 
-    # and the api status.
+    # Use the weather_information package to get data in the weatherdata object and the api status.
     # The raw OpenWeatherMap API data does not find usage in this route, call route '/current/openweathermaps' instead.)
     _ , weatherdata, api_error_code, api_error_msg = WeatherInfo(city_name=location, user_api=openweathermaps_api_key)
 
@@ -113,17 +114,30 @@ def weatherinformation():
         }
     payload.update(error_key_dict_add)  
 
-    # Finally, place payload dict in http response.  
+    # Finally, payload dict in http response by serialize the given argument as JSON & http security header
     response = make_response(jsonify(payload))
+    #X-Frame-Options - prevents external sites from embedding your site in an iframe.
+    response.headers['X-Frame-Option'] = 'SAMEORIGIN'
+    #HTTP Strict Transport Security (HSTS) - HTTP to HTTPS request, preventing man-in-the-middle attacks.
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    #X-Content-Type-Options - Forces the browser to honor the response content type instead of trying to detect it, which can be abused to generate a cross-site scripting (XSS) attack.
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    #Content Security Policy (CSP) - Tell the browser where it can load various types of resource from.
+    response.headers['Content-Security-Policy'] = "default-src 'self'" 
+
     del payload
     return response
 
-@app.route('/current/openweathermaps', methods=['GET'])
+@app.route('/api/current/openweathermaps', methods=['GET'])
 def weatherinformation_oc():
     location = request.args.get("location", None)
     openweathermaps_api_key = request.args.get("openweathermaps_api_key", None)
     # plane display of the original content provided by the OpenWeatherMap API's response. 
     api_data, _ , _ , _ = WeatherInfo(city_name=location,user_api=openweathermaps_api_key)
     response = make_response(jsonify(api_data))
+    response.headers['X-Frame-Option'] = 'SAMEORIGIN'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Content-Security-Policy'] = "default-src 'self'" 
     del api_data
-    return response
+    return response 

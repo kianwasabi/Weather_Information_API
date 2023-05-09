@@ -5,17 +5,17 @@
 # production http servers do not execute this block. 
 # Therefore, run.py & config.py are only meant for development on a local machine.  
 # !! The flask application is executed in production with the routes.py file. 
-
-from config import *
 from routes import *
+import socket
 
 def main(): 
-    app.run(hostIP, port, debug=True)
-    # try: 
-    #     app.run(hostIP, port, debug=True)
-    #     print("🫡 Server started")
-    # except Exception as err:
-    #     print (f"Starting Server failed - Error: ç{err}")
+    hostname = socket.gethostname()
+    hostIP = socket.gethostbyname(hostname)
+    port = 8080
+    try: 
+        app.run(hostIP, port, debug=True)
+    except Exception as err:
+        print (f"Starting Server failed - Error: {err}")
 
 if __name__ == '__main__':
     main()
